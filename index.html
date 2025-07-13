@@ -78,6 +78,7 @@
         
         .form-group {
             margin-bottom: 20px;
+            position: relative;
         }
         
         .form-group label {
@@ -104,11 +105,23 @@
             cursor: pointer;
             font-size: 1em;
             margin: 5px;
+            transition: all 0.3s ease;
         }
         
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-template {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            font-size: 0.9em;
+            padding: 8px 15px;
+            margin: 3px;
+        }
+        
+        .btn-template:hover {
+            background: linear-gradient(45deg, #e67e22, #d35400);
         }
         
         .room-list {
@@ -124,6 +137,7 @@
             align-items: center;
             padding: 15px;
             border-bottom: 1px solid #eee;
+            position: relative;
         }
         
         .room-item:last-child {
@@ -183,6 +197,97 @@
             border-radius: 5px;
         }
         
+        .template-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .template-section h4 {
+            color: #856404;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 280px;
+            background-color: #2c3e50;
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 15px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -140px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9em;
+            line-height: 1.4;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2c3e50 transparent transparent transparent;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .advice-banner {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        
+        .advice-banner strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .efficiency-meter {
+            background: #ecf0f1;
+            height: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .efficiency-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: all 0.5s ease;
+        }
+        
+        .efficiency-excellent { background: #27ae60; }
+        .efficiency-good { background: #f39c12; }
+        .efficiency-poor { background: #e74c3c; }
+        
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -191,6 +296,11 @@
             .upload-section {
                 border-right: none;
                 border-bottom: 1px solid #eee;
+            }
+            
+            .tooltip .tooltiptext {
+                width: 250px;
+                margin-left: -125px;
             }
         }
     </style>
@@ -211,6 +321,17 @@
                     <h3>Sleep PDF hier of klik om te uploaden</h3>
                     <p>Plattegrond met afmetingen (.pdf, max 10MB)</p>
                     <input type="file" id="pdfInput" accept=".pdf" style="margin-top: 15px;">
+                </div>
+                
+                <div class="template-section">
+                    <h4>🎯 Smart Templates</h4>
+                    <p>Kies een optimale indeling gebaseerd op uw praktijkgrootte:</p>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-template" onclick="applyTemplate('small')">Kleine Praktijk (&lt;60m²)</button>
+                        <button class="btn btn-template" onclick="applyTemplate('medium')">Middelgrote Praktijk (60-120m²)</button>
+                        <button class="btn btn-template" onclick="applyTemplate('large')">Grote Praktijk (120-200m²)</button>
+                        <button class="btn btn-template" onclick="applyTemplate('group')">Groepspraktijk (&gt;200m²)</button>
+                    </div>
                 </div>
                 
                 <div id="extractedRooms" class="hidden">
@@ -245,12 +366,35 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Totaal oppervlakte (m²):</label>
+                    <label>
+                        Totaal oppervlakte (m²): 
+                        <span class="tooltip">ℹ️
+                            <span class="tooltiptext">
+                                <strong>Optimale Praktijkgrootte:</strong><br>
+                                • 40-60m²: Solo praktijk<br>
+                                • 80-120m²: 2 behandelkamers<br>
+                                • 150-200m²: 3-4 behandelkamers<br>
+                                • 200m²+: Groepspraktijk<br><br>
+                                <strong>Tip:</strong> Reken 15-20m² per behandelkamer voor optimale workflow.
+                            </span>
+                        </span>
+                    </label>
                     <input type="number" id="totalArea" placeholder="Bijv. 120" min="0" onchange="calculate()">
                 </div>
                 
                 <div class="form-group">
-                    <label>Verbouwingsniveau:</label>
+                    <label>
+                        Verbouwingsniveau:
+                        <span class="tooltip">ℹ️
+                            <span class="tooltiptext">
+                                <strong>Kies het juiste niveau:</strong><br>
+                                • <strong>Basis:</strong> Schilderen, nieuwe vloer, basis installaties<br>
+                                • <strong>Standaard:</strong> + Nieuwe verlichting, sanitair updates<br>
+                                • <strong>Premium:</strong> + Complete elektra, airconditionig<br>
+                                • <strong>Luxe:</strong> + Hoogwaardige afwerking, smart systems
+                            </span>
+                        </span>
+                    </label>
                     <select id="renovationLevel" onchange="calculate()">
                         <option value="basic">Basis renovatie - €350/m²</option>
                         <option value="standard" selected>Standaard renovatie - €550/m²</option>
@@ -260,10 +404,24 @@
                 </div>
                 
                 <div class="room-list">
-                    <h3>🏠 Ruimte Configuratie</h3>
+                    <h3>
+                        🏠 Ruimte Configuratie
+                        <span class="tooltip">ℹ️
+                            <span class="tooltiptext">
+                                <strong>Optimale Ruimteverdeling:</strong><br>
+                                • <strong>Behandelkamers:</strong> 12-16m² per kamer<br>
+                                • <strong>Wachtruimte:</strong> 2m² per stoel, min. 15m²<br>
+                                • <strong>Receptie:</strong> 10-15m² voor workflow<br>
+                                • <strong>Sterilisatie:</strong> 6-10m², dichtbij behandelkamers<br>
+                                • <strong>Röntgen:</strong> 8-12m², afgeschermd<br><br>
+                                <strong>Workflow tip:</strong> Plaats sterilisatie centraal tussen behandelkamers.
+                            </span>
+                        </span>
+                    </h3>
                     <div id="roomsList">
                         <!-- Ruimtes worden hier toegevoegd -->
                     </div>
+                    <div id="efficiencyAdvice"></div>
                 </div>
                 
                 <button class="btn" onclick="addRoom()">+ Ruimte Toevoegen</button>
@@ -292,16 +450,18 @@
                     📄 Offerte Genereren
                 </button>
                 
-                <div id="contactForm" class="contact-form hidden">
+                <form name="contact" method="POST" data-netlify="true" id="contactForm" class="contact-form hidden">
                     <h3>📧 Offerte Aanvragen</h3>
-                    <input type="text" placeholder="Naam *" required>
-                    <input type="email" placeholder="Email *" required>
-                    <input type="tel" placeholder="Telefoon">
-                    <input type="text" placeholder="Praktijk naam">
-                    <textarea placeholder="Opmerkingen" rows="3"></textarea>
-                    <button class="btn">Verzenden</button>
-                    <button class="btn" onclick="hideContact()" style="background: #95a5a6;">Annuleren</button>
-                </div>
+                    <input type="text" name="name" placeholder="Naam *" required>
+                    <input type="email" name="email" placeholder="Email *" required>
+                    <input type="tel" name="phone" placeholder="Telefoon">
+                    <input type="text" name="practice" placeholder="Praktijk naam">
+                    <input type="date" name="start-date" placeholder="Gewenste startdatum">
+                    <textarea name="message" placeholder="Opmerkingen" rows="3"></textarea>
+                    <input type="hidden" name="quote-data" id="quoteData">
+                    <button type="submit" class="btn">Verzenden</button>
+                    <button type="button" class="btn" onclick="hideContact()" style="background: #95a5a6;">Annuleren</button>
+                </form>
                 
                 <button class="btn" onclick="showContact()" style="width: 100%; margin-top: 10px; background: linear-gradient(45deg, #27ae60, #2ecc71);">
                     📧 Offerte Aanvragen
@@ -334,6 +494,106 @@
         // Globale variabelen
         var rooms = [];
         var roomCounter = 0;
+        var currentQuote = null;
+        
+        // Smart Templates
+        var templates = {
+            small: {
+                area: 50,
+                level: 'standard',
+                rooms: [
+                    { type: 'behandelkamer', size: 14, name: 'Behandelkamer', furniture: 'standard' },
+                    { type: 'wachtruimte', size: 16, name: 'Compacte Wachtruimte', furniture: 'standard' },
+                    { type: 'receptie', size: 12, name: 'Receptie/Administratie', furniture: 'standard' },
+                    { type: 'sterilisatie', size: 8, name: 'Sterilisatie', furniture: 'standard' }
+                ]
+            },
+            medium: {
+                area: 100,
+                level: 'standard',
+                rooms: [
+                    { type: 'behandelkamer', size: 15, name: 'Behandelkamer 1', furniture: 'standard' },
+                    { type: 'behandelkamer', size: 15, name: 'Behandelkamer 2', furniture: 'standard' },
+                    { type: 'wachtruimte', size: 25, name: 'Wachtruimte', furniture: 'issolid' },
+                    { type: 'receptie', size: 18, name: 'Receptie & Balie', furniture: 'issolid' },
+                    { type: 'sterilisatie', size: 10, name: 'Sterilisatie Centrum', furniture: 'standard' },
+                    { type: 'röntgen', size: 12, name: 'Röntgen Ruimte', furniture: 'standard' },
+                    { type: 'berging', size: 5, name: 'Berging/Voorraad', furniture: 'standard' }
+                ]
+            },
+            large: {
+                area: 160,
+                level: 'premium',
+                rooms: [
+                    { type: 'behandelkamer', size: 16, name: 'Behandelkamer 1', furniture: 'issolid' },
+                    { type: 'behandelkamer', size: 16, name: 'Behandelkamer 2', furniture: 'issolid' },
+                    { type: 'behandelkamer', size: 14, name: 'Behandelkamer 3', furniture: 'standard' },
+                    { type: 'wachtruimte', size: 35, name: 'Grote Wachtruimte', furniture: 'issolid' },
+                    { type: 'receptie', size: 22, name: 'Receptie & Service', furniture: 'issolid' },
+                    { type: 'sterilisatie', size: 12, name: 'Sterilisatie Centrum', furniture: 'issolid' },
+                    { type: 'röntgen', size: 15, name: 'Röntgen & Diagnostiek', furniture: 'issolid' },
+                    { type: 'berging', size: 8, name: 'Voorraad & Archief', furniture: 'standard' }
+                ]
+            },
+            group: {
+                area: 250,
+                level: 'premium',
+                rooms: [
+                    { type: 'behandelkamer', size: 16, name: 'Behandelkamer 1 (Premium)', furniture: 'issolid' },
+                    { type: 'behandelkamer', size: 16, name: 'Behandelkamer 2 (Premium)', furniture: 'issolid' },
+                    { type: 'behandelkamer', size: 16, name: 'Behandelkamer 3 (Premium)', furniture: 'issolid' },
+                    { type: 'behandelkamer', size: 14, name: 'Behandelkamer 4', furniture: 'standard' },
+                    { type: 'wachtruimte', size: 45, name: 'Grote Wachtruimte', furniture: 'issolid' },
+                    { type: 'receptie', size: 30, name: 'Receptie & Service Desk', furniture: 'issolid' },
+                    { type: 'sterilisatie', size: 15, name: 'Centraal Sterilisatie', furniture: 'issolid' },
+                    { type: 'röntgen', size: 18, name: 'Röntgen & Diagnostiek', furniture: 'issolid' },
+                    { type: 'berging', size: 12, name: 'Voorraad & Archief', furniture: 'standard' }
+                ]
+            }
+        };
+        
+        // Apply smart template
+        function applyTemplate(templateType) {
+            var template = templates[templateType];
+            if (!template) return;
+            
+            // Reset rooms
+            rooms = [];
+            roomCounter = 0;
+            
+            // Set area and renovation level
+            document.getElementById('totalArea').value = template.area;
+            document.getElementById('renovationLevel').value = template.level;
+            
+            // Add template rooms
+            for (var i = 0; i < template.rooms.length; i++) {
+                var room = template.rooms[i];
+                roomCounter++;
+                rooms.push({
+                    id: roomCounter,
+                    type: room.type,
+                    size: room.size,
+                    name: room.name,
+                    furniture: room.furniture
+                });
+            }
+            
+            renderRooms();
+            calculate();
+            
+            // Show success message
+            alert('✅ ' + getTemplateName(templateType) + ' template toegepast!\n\nOptimale indeling gebaseerd op best practices voor ' + template.area + 'm² praktijken.');
+        }
+        
+        function getTemplateName(type) {
+            var names = {
+                'small': 'Kleine Praktijk',
+                'medium': 'Middelgrote Praktijk', 
+                'large': 'Grote Praktijk',
+                'group': 'Groepspraktijk'
+            };
+            return names[type] || type;
+        }
         
         // Basis functies
         function addRoom(type, size, name) {
@@ -357,7 +617,6 @@
         
         function addPDFRoom(type, size, name) {
             addRoom(type, size, name);
-            // Toon geëxtraheerde ruimtes na eerste toevoeging
             document.getElementById('extractedRooms').classList.remove('hidden');
         }
         
@@ -430,6 +689,89 @@
             document.getElementById('furnitureCost').textContent = '€' + furnitureCost.toLocaleString('nl-NL');
             document.getElementById('installationCost').textContent = '€' + installationCost.toLocaleString('nl-NL');
             document.getElementById('totalCost').textContent = '€' + totalCost.toLocaleString('nl-NL');
+            
+            // Update current quote voor form
+            currentQuote = {
+                totalArea: totalArea,
+                renovationLevel: renovationLevel,
+                rooms: rooms,
+                renovationCost: renovationCost,
+                furnitureCost: furnitureCost,
+                installationCost: installationCost,
+                totalCost: totalCost
+            };
+            
+            // Show efficiency advice
+            showEfficiencyAdvice();
+        }
+        
+        function showEfficiencyAdvice() {
+            var totalArea = parseFloat(document.getElementById('totalArea').value) || 0;
+            var roomsArea = 0;
+            var behandelkamers = 0;
+            
+            for (var i = 0; i < rooms.length; i++) {
+                roomsArea += rooms[i].size;
+                if (rooms[i].type === 'behandelkamer') {
+                    behandelkamers++;
+                }
+            }
+            
+            var efficiency = totalArea > 0 ? (roomsArea / totalArea) * 100 : 0;
+            var adviceHtml = '';
+            
+            if (totalArea > 0 && rooms.length > 0) {
+                var efficiencyClass = '';
+                var advice = '';
+                
+                if (efficiency >= 85) {
+                    efficiencyClass = 'efficiency-excellent';
+                    advice = '<strong>Uitstekende ruimte-efficiency!</strong> Optimaal gebruik van beschikbare ruimte.';
+                } else if (efficiency >= 70) {
+                    efficiencyClass = 'efficiency-good';
+                    advice = '<strong>Goede ruimte-efficiency.</strong> Kleine optimalisaties mogelijk.';
+                } else {
+                    efficiencyClass = 'efficiency-poor';
+                    advice = '<strong>Ruimte voor verbetering.</strong> Overweeg extra behandelkamer of grotere wachtruimte.';
+                }
+                
+                // Specifieke adviezen
+                var specificAdvice = [];
+                
+                if (behandelkamers === 1 && totalArea > 80) {
+                    specificAdvice.push('💡 Met ' + totalArea + 'm² is ruimte voor een tweede behandelkamer (+€' + (pricing.furniture.behandelkamer.standard/1000).toFixed(0) + 'k omzet/jaar)');
+                }
+                
+                if (totalArea > 60 && !hasRoomType('sterilisatie')) {
+                    specificAdvice.push('🧼 Overweeg aparte sterilisatieruimte voor betere workflow');
+                }
+                
+                if (totalArea > 100 && !hasRoomType('röntgen')) {
+                    specificAdvice.push('📸 Eigen röntgen kan €' + ((behandelkamers * 25000)/1000).toFixed(0) + 'k extra omzet genereren');
+                }
+                
+                adviceHtml = '<div class="advice-banner">';
+                adviceHtml += advice;
+                adviceHtml += '<div class="efficiency-meter"><div class="efficiency-fill ' + efficiencyClass + '" style="width: ' + Math.min(efficiency, 100) + '%"></div></div>';
+                adviceHtml += '<small>Ruimte-efficiency: ' + efficiency.toFixed(0) + '% (' + roomsArea + 'm² van ' + totalArea + 'm²)</small>';
+                
+                if (specificAdvice.length > 0) {
+                    adviceHtml += '<br><br>' + specificAdvice.join('<br>');
+                }
+                
+                adviceHtml += '</div>';
+            }
+            
+            document.getElementById('efficiencyAdvice').innerHTML = adviceHtml;
+        }
+        
+        function hasRoomType(type) {
+            for (var i = 0; i < rooms.length; i++) {
+                if (rooms[i].type === type) {
+                    return true;
+                }
+            }
+            return false;
         }
         
         function generateQuote() {
@@ -467,22 +809,28 @@
                 'table{width:100%;border-collapse:collapse;margin:20px 0}' +
                 'th,td{border:1px solid #ddd;padding:12px;text-align:left}' +
                 'th{background:#f8f9fa;font-weight:bold}' +
-                '.total{font-weight:bold;background:#e8f5e8}</style></head>' +
+                '.total{font-weight:bold;background:#e8f5e8}' +
+                '.advice{background:#e3f2fd;padding:15px;border-radius:8px;margin:20px 0}</style></head>' +
                 '<body><div class="header"><div class="logo">🦷 Dental Space Pro</div>' +
-                '<h1>Tandartspraktijk Offerte</h1><p>Datum: ' + new Date().toLocaleDateString('nl-NL') + '</p></div>' +
+                '<h1>Tandartspraktijk Offerte</h1><p>Datum: ' + new Date().toLocaleDateString('nl-NL') + ' | Professionele kostencalculatie</p></div>' +
                 '<h2>Ruimte-indeling & Meubilair</h2>' +
                 '<table><tr><th>Ruimte</th><th>Oppervlakte</th><th>Meubilair</th><th>Prijs</th></tr>' +
                 roomsHtml + '</table>' +
                 '<h2>Kostenoverzicht</h2>' +
-                '<table><tr><td>Verbouwing</td><td>' + document.getElementById('renovationCost').textContent + '</td></tr>' +
-                '<tr><td>Meubilair</td><td>' + document.getElementById('furnitureCost').textContent + '</td></tr>' +
-                '<tr><td>Installatie</td><td>' + document.getElementById('installationCost').textContent + '</td></tr>' +
+                '<table><tr><td>Verbouwing (' + document.getElementById('renovationLevel').value + ')</td><td>' + document.getElementById('renovationCost').textContent + '</td></tr>' +
+                '<tr><td>Meubilair & Inrichting</td><td>' + document.getElementById('furnitureCost').textContent + '</td></tr>' +
+                '<tr><td>Installatie & Montage</td><td>' + document.getElementById('installationCost').textContent + '</td></tr>' +
                 '<tr class="total"><td><strong>Totaal (excl. BTW)</strong></td><td><strong>' + document.getElementById('totalCost').textContent + '</strong></td></tr></table>' +
-                '<p><em>Deze offerte is 30 dagen geldig. Neem contact op voor een vrijblijvende afspraak.</em></p></body></html>'
+                '<div class="advice"><strong>💡 Inrichtingsadvies inbegrepen:</strong><br>Deze offerte is gebaseerd op bewezen best practices voor optimale workflow en patiëntervaring. Inclusief professioneel advies over ruimte-efficiency en toekomstbestendige inrichting.</div>' +
+                '<p><em>Deze offerte is 30 dagen geldig. Neem contact op voor een vrijblijvende afspraak en persoonlijk advies.</em></p></body></html>'
             );
         }
         
         function showContact() {
+            // Update quote data in hidden field
+            if (currentQuote) {
+                document.getElementById('quoteData').value = JSON.stringify(currentQuote);
+            }
             document.getElementById('contactForm').classList.remove('hidden');
         }
         
@@ -502,16 +850,13 @@
         
         // Initiële setup
         window.addEventListener('load', function() {
-            // Voeg standaard ruimtes toe
-            addRoom('behandelkamer', 12, 'Behandelkamer 1');
-            addRoom('wachtruimte', 25, 'Wachtruimte');
+            // Start met lege configuratie - laat gebruiker template kiezen
+            console.log('Dental Space Pro Calculator geladen - Smart Templates & Advies actief!');
             
-            // Zet standaard oppervlakte
-            document.getElementById('totalArea').value = 50;
+            // Toon wel standaard waarden
+            document.getElementById('totalArea').value = 80;
             calculate();
         });
-        
-        console.log('Dental Space Pro Calculator geladen - geen errors!');
     </script>
 </body>
 </html>
