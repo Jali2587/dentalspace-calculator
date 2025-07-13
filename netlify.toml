@@ -1,0 +1,18 @@
+toml[build]
+  publish = "."
+
+[[redirects]]
+  from = "//www.calculator.dentalspace.pro/*"
+  to = "//calculator.dentalspace.pro/:splat"
+  status = 301
+  force = true
+
+[forms]
+  settings = { recipients = ["info@dentalspace.pro"] }
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+
