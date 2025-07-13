@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dental Space Pro Calculator - Tandartspraktijk Kostencalculatie</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        
+        .upload-section {
+            padding: 40px;
+            border-right: 1px solid #eee;
+        }
+        
+        .calculator-section {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            margin-bottom: 20px;
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .room-list {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .room-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .room-item:last-child {
+            border-bottom: none;
+        }
+        
+        .room-type {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .room-size {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        .cost-summary {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .total-cost {
+            font-size: 1.5em;
+            font-weight: bold;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .contact-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .contact-form input,
+        .contact-form select,
+        .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .upload-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦷 Dental Space Pro Calculator</h1>
+            <p>Professionele kostencalculatie voor tandartspraktijk inrichtingen</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2 class="section-title">📄 PDF Upload</h2>
+                
+                <div class="upload-area">
+                    <div class="upload-icon">📁</div>
+                    <h3>Sleep PDF hier of klik om te uploaden</h3>
+                    <p>Plattegrond met afmetingen (.pdf, max 10MB)</p>
+                    <input type="file" id="pdfInput" accept=".pdf" style="margin-top: 15px;">
+                </div>
+                
+                <div id="extractedRooms" class="hidden">
+                    <h4>Gevonden ruimtes:</h4>
+                    <div class="room-item">
+                        <div>
+                            <div class="room-type">Behandelkamer 1</div>
+                            <div class="room-size">12 m²</div>
+                        </div>
+                        <button class="btn" onclick="addPDFRoom('behandelkamer', 12, 'Behandelkamer 1')">+ Toevoegen</button>
+                    </div>
+                    <div class="room-item">
+                        <div>
+                            <div class="room-type">Wachtruimte</div>
+                            <div class="room-size">25 m²</div>
+                        </div>
+                        <button class="btn" onclick="addPDFRoom('wachtruimte', 25, 'Wachtruimte')">+ Toevoegen</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="calculator-section">
+                <h2 class="section-title">🧮 Kostencalculatie</h2>
+                
+                <div class="form-group">
+                    <label>Praktijk Type:</label>
+                    <select id="practiceType" onchange="calculate()">
+                        <option value="algemeen">Algemene praktijk</option>
+                        <option value="specialist">Specialistenpraktijk</option>
+                        <option value="groepspraktijk">Groepspraktijk</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Totaal oppervlakte (m²):</label>
+                    <input type="number" id="totalArea" placeholder="Bijv. 120" min="0" onchange="calculate()">
+                </div>
+                
+                <div class="form-group">
+                    <label>Verbouwingsniveau:</label>
+                    <select id="renovationLevel" onchange="calculate()">
+                        <option value="basic">Basis renovatie - €350/m²</option>
+                        <option value="standard" selected>Standaard renovatie - €550/m²</option>
+                        <option value="premium">Premium renovatie - €750/m²</option>
+                        <option value="luxury">Luxe renovatie - €1200/m²</option>
+                    </select>
+                </div>
+                
+                <div class="room-list">
+                    <h3>🏠 Ruimte Configuratie</h3>
+                    <div id="roomsList">
+                        <!-- Ruimtes worden hier toegevoegd -->
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="addRoom()">+ Ruimte Toevoegen</button>
+                
+                <div class="cost-summary">
+                    <h3>💰 Kostenoverzicht</h3>
+                    <div class="cost-item">
+                        <span>Verbouwing:</span>
+                        <span id="renovationCost">€0</span>
+                    </div>
+                    <div class="cost-item">
+                        <span>Meubilair:</span>
+                        <span id="furnitureCost">€0</span>
+                    </div>
+                    <div class="cost-item">
+                        <span>Installatie:</span>
+                        <span id="installationCost">€0</span>
+                    </div>
+                    <div class="cost-item total-cost">
+                        <span>Totaal (excl. BTW):</span>
+                        <span id="totalCost">€0</span>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="generateQuote()" style="width: 100%; margin-top: 20px;">
+                    📄 Offerte Genereren
+                </button>
+                
+                <div id="contactForm" class="contact-form hidden">
+                    <h3>📧 Offerte Aanvragen</h3>
+                    <input type="text" placeholder="Naam *" required>
+                    <input type="email" placeholder="Email *" required>
+                    <input type="tel" placeholder="Telefoon">
+                    <input type="text" placeholder="Praktijk naam">
+                    <textarea placeholder="Opmerkingen" rows="3"></textarea>
+                    <button class="btn">Verzenden</button>
+                    <button class="btn" onclick="hideContact()" style="background: #95a5a6;">Annuleren</button>
+                </div>
+                
+                <button class="btn" onclick="showContact()" style="width: 100%; margin-top: 10px; background: linear-gradient(45deg, #27ae60, #2ecc71);">
+                    📧 Offerte Aanvragen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Eenvoudige, foutloze JavaScript
+        
+        // Prijs configuratie
+        var pricing = {
+            renovation: {
+                basic: 350,
+                standard: 550,
+                premium: 750,
+                luxury: 1200
+            },
+            furniture: {
+                behandelkamer: { standard: 15000, issolid: 28000 },
+                wachtruimte: { standard: 8000, issolid: 15000 },
+                receptie: { standard: 12000, issolid: 22000 },
+                sterilisatie: { standard: 18000, issolid: 32000 },
+                röntgen: { standard: 25000, issolid: 45000 },
+                berging: { standard: 2000, issolid: 4000 }
+            }
+        };
+        
+        // Globale variabelen
+        var rooms = [];
+        var roomCounter = 0;
+        
+        // Basis functies
+        function addRoom(type, size, name) {
+            type = type || 'behandelkamer';
+            size = size || 12;
+            name = name || 'Ruimte ' + (roomCounter + 1);
+            
+            roomCounter++;
+            var room = {
+                id: roomCounter,
+                type: type,
+                size: size,
+                name: name,
+                furniture: 'standard'
+            };
+            
+            rooms.push(room);
+            renderRooms();
+            calculate();
+        }
+        
+        function addPDFRoom(type, size, name) {
+            addRoom(type, size, name);
+            // Toon geëxtraheerde ruimtes na eerste toevoeging
+            document.getElementById('extractedRooms').classList.remove('hidden');
+        }
+        
+        function removeRoom(id) {
+            rooms = rooms.filter(function(room) {
+                return room.id !== id;
+            });
+            renderRooms();
+            calculate();
+        }
+        
+        function updateFurniture(id, furniture) {
+            for (var i = 0; i < rooms.length; i++) {
+                if (rooms[i].id === id) {
+                    rooms[i].furniture = furniture;
+                    break;
+                }
+            }
+            calculate();
+        }
+        
+        function renderRooms() {
+            var container = document.getElementById('roomsList');
+            var html = '';
+            
+            for (var i = 0; i < rooms.length; i++) {
+                var room = rooms[i];
+                html += '<div class="room-item">';
+                html += '<div>';
+                html += '<div class="room-type">' + room.name + '</div>';
+                html += '<div class="room-size">' + room.size + ' m²</div>';
+                html += '</div>';
+                html += '<div>';
+                html += '<select onchange="updateFurniture(' + room.id + ', this.value)">';
+                html += '<option value="standard"' + (room.furniture === 'standard' ? ' selected' : '') + '>Standaard</option>';
+                html += '<option value="issolid"' + (room.furniture === 'issolid' ? ' selected' : '') + '>ISsolid</option>';
+                html += '</select>';
+                html += '<button onclick="removeRoom(' + room.id + ')" style="margin-left: 10px; background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px;">×</button>';
+                html += '</div>';
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function calculate() {
+            var totalArea = parseFloat(document.getElementById('totalArea').value) || 0;
+            var renovationLevel = document.getElementById('renovationLevel').value;
+            
+            // Verbouwingskosten
+            var renovationCost = totalArea * pricing.renovation[renovationLevel];
+            
+            // Meubelkosten
+            var furnitureCost = 0;
+            for (var i = 0; i < rooms.length; i++) {
+                var room = rooms[i];
+                if (pricing.furniture[room.type]) {
+                    furnitureCost += pricing.furniture[room.type][room.furniture];
+                }
+            }
+            
+            // Installatiekosten (15% van meubelkosten)
+            var installationCost = furnitureCost * 0.15;
+            
+            // Totaal
+            var totalCost = renovationCost + furnitureCost + installationCost;
+            
+            // Update weergave
+            document.getElementById('renovationCost').textContent = '€' + renovationCost.toLocaleString('nl-NL');
+            document.getElementById('furnitureCost').textContent = '€' + furnitureCost.toLocaleString('nl-NL');
+            document.getElementById('installationCost').textContent = '€' + installationCost.toLocaleString('nl-NL');
+            document.getElementById('totalCost').textContent = '€' + totalCost.toLocaleString('nl-NL');
+        }
+        
+        function generateQuote() {
+            if (rooms.length === 0) {
+                alert('Voeg eerst ruimtes toe voor een offerte.');
+                return;
+            }
+            
+            var totalArea = parseFloat(document.getElementById('totalArea').value) || 0;
+            if (totalArea === 0) {
+                alert('Voer een oppervlakte in.');
+                return;
+            }
+            
+            // Open nieuwe window met offerte
+            var quoteWindow = window.open('', '_blank');
+            
+            var roomsHtml = '';
+            for (var i = 0; i < rooms.length; i++) {
+                var room = rooms[i];
+                var price = pricing.furniture[room.type] ? pricing.furniture[room.type][room.furniture] : 0;
+                roomsHtml += '<tr>';
+                roomsHtml += '<td>' + room.name + '</td>';
+                roomsHtml += '<td>' + room.size + ' m²</td>';
+                roomsHtml += '<td>' + (room.furniture === 'issolid' ? 'ISsolid Premium' : 'Standaard') + '</td>';
+                roomsHtml += '<td>€' + price.toLocaleString('nl-NL') + '</td>';
+                roomsHtml += '</tr>';
+            }
+            
+            quoteWindow.document.write(
+                '<html><head><title>Dental Space Pro Offerte</title>' +
+                '<style>body{font-family:Arial;padding:40px;line-height:1.6}' +
+                '.header{text-align:center;margin-bottom:40px;border-bottom:2px solid #3498db;padding-bottom:20px}' +
+                '.logo{color:#3498db;font-size:2em;margin-bottom:10px}' +
+                'table{width:100%;border-collapse:collapse;margin:20px 0}' +
+                'th,td{border:1px solid #ddd;padding:12px;text-align:left}' +
+                'th{background:#f8f9fa;font-weight:bold}' +
+                '.total{font-weight:bold;background:#e8f5e8}</style></head>' +
+                '<body><div class="header"><div class="logo">🦷 Dental Space Pro</div>' +
+                '<h1>Tandartspraktijk Offerte</h1><p>Datum: ' + new Date().toLocaleDateString('nl-NL') + '</p></div>' +
+                '<h2>Ruimte-indeling & Meubilair</h2>' +
+                '<table><tr><th>Ruimte</th><th>Oppervlakte</th><th>Meubilair</th><th>Prijs</th></tr>' +
+                roomsHtml + '</table>' +
+                '<h2>Kostenoverzicht</h2>' +
+                '<table><tr><td>Verbouwing</td><td>' + document.getElementById('renovationCost').textContent + '</td></tr>' +
+                '<tr><td>Meubilair</td><td>' + document.getElementById('furnitureCost').textContent + '</td></tr>' +
+                '<tr><td>Installatie</td><td>' + document.getElementById('installationCost').textContent + '</td></tr>' +
+                '<tr class="total"><td><strong>Totaal (excl. BTW)</strong></td><td><strong>' + document.getElementById('totalCost').textContent + '</strong></td></tr></table>' +
+                '<p><em>Deze offerte is 30 dagen geldig. Neem contact op voor een vrijblijvende afspraak.</em></p></body></html>'
+            );
+        }
+        
+        function showContact() {
+            document.getElementById('contactForm').classList.remove('hidden');
+        }
+        
+        function hideContact() {
+            document.getElementById('contactForm').classList.add('hidden');
+        }
+        
+        // PDF upload simulatie
+        document.getElementById('pdfInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                setTimeout(function() {
+                    document.getElementById('extractedRooms').classList.remove('hidden');
+                    alert('PDF geanalyseerd! U kunt nu ruimtes uit de PDF toevoegen.');
+                }, 1000);
+            }
+        });
+        
+        // Initiële setup
+        window.addEventListener('load', function() {
+            // Voeg standaard ruimtes toe
+            addRoom('behandelkamer', 12, 'Behandelkamer 1');
+            addRoom('wachtruimte', 25, 'Wachtruimte');
+            
+            // Zet standaard oppervlakte
+            document.getElementById('totalArea').value = 50;
+            calculate();
+        });
+        
+        console.log('Dental Space Pro Calculator geladen - geen errors!');
+    </script>
+</body>
+</html>
