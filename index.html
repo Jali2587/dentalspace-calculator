@@ -27,6 +27,26 @@
             overflow: hidden;
         }
         
+        .back-to-main {
+            background: rgba(44, 62, 80, 0.1);
+            padding: 10px 30px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .back-link {
+            color: #2c3e50;
+            text-decoration: none;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: #3498db;
+        }
+        
         .header {
             background: linear-gradient(45deg, #2c3e50, #34495e);
             color: white;
@@ -288,6 +308,36 @@
         .efficiency-good { background: #f39c12; }
         .efficiency-poor { background: #e74c3c; }
         
+        .inspiration-cta {
+            background: #e8f6f3;
+            border: 1px solid #1dd1a1;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .inspiration-cta h4 {
+            color: #00b894;
+            margin-bottom: 10px;
+        }
+        
+        .btn-inspiration {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-inspiration:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.3);
+        }
+        
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -307,6 +357,12 @@
 </head>
 <body>
     <div class="container">
+        <div class="back-to-main">
+            <a href="//dentalspace.pro" class="back-link">
+                ← Terug naar Dental Space Pro
+            </a>
+        </div>
+        
         <div class="header">
             <h1>🦷 Dental Space Pro Calculator</h1>
             <p>Professionele kostencalculatie voor tandartspraktijk inrichtingen</p>
@@ -426,6 +482,15 @@
                 
                 <button class="btn" onclick="addRoom()">+ Ruimte Toevoegen</button>
                 
+                <div class="inspiration-cta" id="inspirationCTA" style="display: none;">
+                    <h4>💡 Geïnspireerd door uw berekening?</h4>
+                    <p>Bekijk vergelijkbare gerealiseerde projecten voor inspiratie!</p>
+                    <a href="//dentalspace.pro/projecten?ref=calculator&utm_source=calculator" 
+                       class="btn-inspiration" onclick="trackInspiration()">
+                        🎨 Bekijk Onze Portfolio
+                    </a>
+                </div>
+                
                 <div class="cost-summary">
                     <h3>💰 Kostenoverzicht</h3>
                     <div class="cost-item">
@@ -459,6 +524,7 @@
                     <input type="date" name="start-date" placeholder="Gewenste startdatum">
                     <textarea name="message" placeholder="Opmerkingen" rows="3"></textarea>
                     <input type="hidden" name="quote-data" id="quoteData">
+                    <input type="hidden" name="referral-source" value="calculator">
                     <button type="submit" class="btn">Verzenden</button>
                     <button type="button" class="btn" onclick="hideContact()" style="background: #95a5a6;">Annuleren</button>
                 </form>
@@ -471,7 +537,10 @@
     </div>
 
     <script>
-        // Eenvoudige, foutloze JavaScript
+        // Track inspiration link clicks
+        function trackInspiration() {
+            console.log('User clicked inspiration link - going to portfolio');
+        }
         
         // Prijs configuratie
         var pricing = {
@@ -581,7 +650,11 @@
             renderRooms();
             calculate();
             
-            // Show success message
+            // Show inspiration CTA after template is applied
+            setTimeout(function() {
+                document.getElementById('inspirationCTA').style.display = 'block';
+            }, 1500);
+            
             alert('✅ ' + getTemplateName(templateType) + ' template toegepast!\n\nOptimale indeling gebaseerd op best practices voor ' + template.area + 'm² praktijken.');
         }
         
@@ -703,6 +776,13 @@
             
             // Show efficiency advice
             showEfficiencyAdvice();
+            
+            // Show inspiration CTA if calculation is substantial
+            if (totalCost > 25000) {
+                setTimeout(function() {
+                    document.getElementById('inspirationCTA').style.display = 'block';
+                }, 2000);
+            }
         }
         
         function showEfficiencyAdvice() {
@@ -810,7 +890,8 @@
                 'th,td{border:1px solid #ddd;padding:12px;text-align:left}' +
                 'th{background:#f8f9fa;font-weight:bold}' +
                 '.total{font-weight:bold;background:#e8f5e8}' +
-                '.advice{background:#e3f2fd;padding:15px;border-radius:8px;margin:20px 0}</style></head>' +
+                '.advice{background:#e3f2fd;padding:15px;border-radius:8px;margin:20px 0}' +
+                '.cta{background:#27ae60;color:white;padding:20px;text-align:center;border-radius:8px;margin:20px 0}</style></head>' +
                 '<body><div class="header"><div class="logo">🦷 Dental Space Pro</div>' +
                 '<h1>Tandartspraktijk Offerte</h1><p>Datum: ' + new Date().toLocaleDateString('nl-NL') + ' | Professionele kostencalculatie</p></div>' +
                 '<h2>Ruimte-indeling & Meubilair</h2>' +
@@ -822,6 +903,7 @@
                 '<tr><td>Installatie & Montage</td><td>' + document.getElementById('installationCost').textContent + '</td></tr>' +
                 '<tr class="total"><td><strong>Totaal (excl. BTW)</strong></td><td><strong>' + document.getElementById('totalCost').textContent + '</strong></td></tr></table>' +
                 '<div class="advice"><strong>💡 Inrichtingsadvies inbegrepen:</strong><br>Deze offerte is gebaseerd op bewezen best practices voor optimale workflow en patiëntervaring. Inclusief professioneel advies over ruimte-efficiency en toekomstbestendige inrichting.</div>' +
+                '<div class="cta"><h3>🎨 Geïnspireerd door deze kosten?</h3><p>Bekijk onze gerealiseerde projecten voor verdere inspiratie!</p><a href="//dentalspace.pro/projecten" style="color:white;font-weight:bold;text-decoration:underline;">→ Bezoek Ons Portfolio</a></div>' +
                 '<p><em>Deze offerte is 30 dagen geldig. Neem contact op voor een vrijblijvende afspraak en persoonlijk advies.</em></p></body></html>'
             );
         }
@@ -851,7 +933,7 @@
         // Initiële setup
         window.addEventListener('load', function() {
             // Start met lege configuratie - laat gebruiker template kiezen
-            console.log('Dental Space Pro Calculator geladen - Smart Templates & Advies actief!');
+            console.log('Dental Space Pro Calculator geladen - Smart Templates & Cross-linking actief!');
             
             // Toon wel standaard waarden
             document.getElementById('totalArea').value = 80;
