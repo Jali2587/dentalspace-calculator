@@ -515,7 +515,8 @@
                     📄 Offerte Genereren
                 </button>
                 
-                <form name="contact" method="POST" data-netlify="true" id="contactForm" class="contact-form hidden">
+                <form name="contact" method="POST" netlify data-netlify="true" action="/success" id="contactForm" class="contact-form hidden">
+                    <input type="hidden" name="form-name" value="contact">
                     <h3>📧 Offerte Aanvragen</h3>
                     <input type="text" name="name" placeholder="Naam *" required>
                     <input type="email" name="email" placeholder="Email *" required>
