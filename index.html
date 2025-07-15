@@ -308,34 +308,14 @@
         .efficiency-good { background: #f39c12; }
         .efficiency-poor { background: #e74c3c; }
         
-        .inspiration-cta {
-            background: #e8f6f3;
-            border: 1px solid #1dd1a1;
-            border-radius: 10px;
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
             padding: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        .inspiration-cta h4 {
-            color: #00b894;
-            margin-bottom: 10px;
-        }
-        
-        .btn-inspiration {
-            background: linear-gradient(45deg, #00b894, #00a085);
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
             border-radius: 8px;
-            font-weight: 600;
-            display: inline-block;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-inspiration:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.3);
+            margin: 20px 0;
+            display: none;
         }
         
         @media (max-width: 768px) {
@@ -482,15 +462,6 @@
                 
                 <button class="btn" onclick="addRoom()">+ Ruimte Toevoegen</button>
                 
-                <div class="inspiration-cta" id="inspirationCTA" style="display: none;">
-                    <h4>💡 Geïnspireerd door uw berekening?</h4>
-                    <p>Bekijk vergelijkbare gerealiseerde projecten voor inspiratie!</p>
-                    <a href="//dentalspace.pro/projecten?ref=calculator&utm_source=calculator" 
-                       class="btn-inspiration" onclick="trackInspiration()">
-                        🎨 Bekijk Onze Portfolio
-                    </a>
-                </div>
-                
                 <div class="cost-summary">
                     <h3>💰 Kostenoverzicht</h3>
                     <div class="cost-item">
@@ -515,7 +486,11 @@
                     📄 Offerte Genereren
                 </button>
                 
-                <form name="contact" method="POST" netlify data-netlify="true" action="/success" id="contactForm" class="contact-form hidden">
+                <div id="successMessage" class="success-message">
+                    <strong>✅ Bedankt!</strong> Uw offerte aanvraag is succesvol verzonden. We nemen binnen 24 uur contact met u op.
+                </div>
+                
+                <form name="contact" method="POST" data-netlify="true" netlify id="contactForm" class="contact-form hidden">
                     <input type="hidden" name="form-name" value="contact">
                     <h3>📧 Offerte Aanvragen</h3>
                     <input type="text" name="name" placeholder="Naam *" required>
@@ -538,11 +513,6 @@
     </div>
 
     <script>
-        // Track inspiration link clicks
-        function trackInspiration() {
-            console.log('User clicked inspiration link - going to portfolio');
-        }
-        
         // Prijs configuratie
         var pricing = {
             renovation: {
@@ -650,11 +620,6 @@
             
             renderRooms();
             calculate();
-            
-            // Show inspiration CTA after template is applied
-            setTimeout(function() {
-                document.getElementById('inspirationCTA').style.display = 'block';
-            }, 1500);
             
             alert('✅ ' + getTemplateName(templateType) + ' template toegepast!\n\nOptimale indeling gebaseerd op best practices voor ' + template.area + 'm² praktijken.');
         }
@@ -777,13 +742,6 @@
             
             // Show efficiency advice
             showEfficiencyAdvice();
-            
-            // Show inspiration CTA if calculation is substantial
-            if (totalCost > 25000) {
-                setTimeout(function() {
-                    document.getElementById('inspirationCTA').style.display = 'block';
-                }, 2000);
-            }
         }
         
         function showEfficiencyAdvice() {
@@ -891,8 +849,7 @@
                 'th,td{border:1px solid #ddd;padding:12px;text-align:left}' +
                 'th{background:#f8f9fa;font-weight:bold}' +
                 '.total{font-weight:bold;background:#e8f5e8}' +
-                '.advice{background:#e3f2fd;padding:15px;border-radius:8px;margin:20px 0}' +
-                '.cta{background:#27ae60;color:white;padding:20px;text-align:center;border-radius:8px;margin:20px 0}</style></head>' +
+                '.advice{background:#e3f2fd;padding:15px;border-radius:8px;margin:20px 0}</style></head>' +
                 '<body><div class="header"><div class="logo">🦷 Dental Space Pro</div>' +
                 '<h1>Tandartspraktijk Offerte</h1><p>Datum: ' + new Date().toLocaleDateString('nl-NL') + ' | Professionele kostencalculatie</p></div>' +
                 '<h2>Ruimte-indeling & Meubilair</h2>' +
@@ -904,7 +861,6 @@
                 '<tr><td>Installatie & Montage</td><td>' + document.getElementById('installationCost').textContent + '</td></tr>' +
                 '<tr class="total"><td><strong>Totaal (excl. BTW)</strong></td><td><strong>' + document.getElementById('totalCost').textContent + '</strong></td></tr></table>' +
                 '<div class="advice"><strong>💡 Inrichtingsadvies inbegrepen:</strong><br>Deze offerte is gebaseerd op bewezen best practices voor optimale workflow en patiëntervaring. Inclusief professioneel advies over ruimte-efficiency en toekomstbestendige inrichting.</div>' +
-                '<div class="cta"><h3>🎨 Geïnspireerd door deze kosten?</h3><p>Bekijk onze gerealiseerde projecten voor verdere inspiratie!</p><a href="//dentalspace.pro/projecten" style="color:white;font-weight:bold;text-decoration:underline;">→ Bezoek Ons Portfolio</a></div>' +
                 '<p><em>Deze offerte is 30 dagen geldig. Neem contact op voor een vrijblijvende afspraak en persoonlijk advies.</em></p></body></html>'
             );
         }
@@ -921,6 +877,35 @@
             document.getElementById('contactForm').classList.add('hidden');
         }
         
+        // Handle form submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            var formData = new FormData(this);
+            
+            // Submit via fetch
+            fetch('/', {
+                method: 'POST',
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams(formData).toString()
+            })
+            .then(function() {
+                // Hide form and show success message
+                document.getElementById('contactForm').classList.add('hidden');
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Hide success message after 10 seconds
+                setTimeout(function() {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 10000);
+            })
+            .catch(function(error) {
+                alert('Er is een fout opgetreden. Probeer het opnieuw of neem direct contact op via expert@dentalspace.pro');
+                console.error('Error:', error);
+            });
+        });
+        
         // PDF upload simulatie
         document.getElementById('pdfInput').addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
@@ -933,8 +918,7 @@
         
         // Initiële setup
         window.addEventListener('load', function() {
-            // Start met lege configuratie - laat gebruiker template kiezen
-            console.log('Dental Space Pro Calculator geladen - Smart Templates & Cross-linking actief!');
+            console.log('Dental Space Pro Calculator geladen - Smart Templates actief!');
             
             // Toon wel standaard waarden
             document.getElementById('totalArea').value = 80;
