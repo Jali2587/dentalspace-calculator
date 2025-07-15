@@ -7,7 +7,8 @@
   status = 301
   force = true
 
-[forms]
+[[forms]]
+  name = "contact"
   settings = { recipients = ["expert@dentalspace.pro"] }
 
 [[headers]]
